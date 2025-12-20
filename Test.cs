@@ -15,9 +15,8 @@ namespace _2025
             Console.WriteLine("This is test file again");
             int input = Convert.ToInt32(Console.ReadLine());
             Console.WriteLine("You entered: " + input);
-
-            Console.WriteLine("Output phase started..");
-            Console.WriteLine("End of the main");
+            Console.WriteLine("Press Enter to exit.");
+            Console.WriteLine("Additional line for testing.");
 
             Console.ReadLine();
         }
