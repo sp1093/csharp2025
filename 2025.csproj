@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>_2025</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="CharacterCount.cs" />
+    <Compile Remove="Collection1.cs" />
+    <Compile Remove="ConsoleLogger.cs" />
+    <Compile Remove="DuplicateInteger.cs" />
+    <Compile Remove="Encapsulation.cs" />
+    <Compile Remove="FindDuplicateString.cs" />
+    <Compile Remove="IntegerDuplicate.cs" />
+    <Compile Remove="RemoveDuplicateArray.cs" />
+    <Compile Remove="StringReverser.cs" />
+    <Compile Remove="SubstringFinder.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="CharacterCount.cs" />
+    <None Include="Collection1.cs" />
+    <None Include="ConsoleLogger.cs" />
+    <None Include="DuplicateInteger.cs" />
+    <None Include="Encapsulation.cs" />
+    <None Include="FindDuplicateString.cs" />
+    <None Include="IntegerDuplicate.cs" />
+    <None Include="RemoveDuplicateArray.cs" />
+    <None Include="StringReverser.cs" />
+    <None Include="SubstringFinder.cs" />
+  </ItemGroup>
+
+</Project>

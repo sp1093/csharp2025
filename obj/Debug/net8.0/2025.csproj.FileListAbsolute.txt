@@ -1,0 +1,14 @@
+D:\Interview\2025\2025\2025\bin\Debug\net8.0\2025.exe
+D:\Interview\2025\2025\2025\bin\Debug\net8.0\2025.deps.json
+D:\Interview\2025\2025\2025\bin\Debug\net8.0\2025.runtimeconfig.json
+D:\Interview\2025\2025\2025\bin\Debug\net8.0\2025.dll
+D:\Interview\2025\2025\2025\bin\Debug\net8.0\2025.pdb
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.GeneratedMSBuildEditorConfig.editorconfig
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.AssemblyInfoInputs.cache
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.AssemblyInfo.cs
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.csproj.CoreCompileInputs.cache
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.dll
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\refint\2025.dll
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.pdb
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.genruntimeconfig.cache
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\ref\2025.dll
