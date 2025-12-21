@@ -13,7 +13,6 @@
     <Compile Remove="Collection1.cs" />
     <Compile Remove="ConsoleLogger.cs" />
     <Compile Remove="DuplicateInteger.cs" />
-    <Compile Remove="Encapsulation.cs" />
     <Compile Remove="ExtensionMethods.cs" />
     <Compile Remove="FindDuplicateString.cs" />
     <Compile Remove="IntegerDuplicate.cs" />
@@ -27,7 +26,6 @@
     <None Include="Collection1.cs" />
     <None Include="ConsoleLogger.cs" />
     <None Include="DuplicateInteger.cs" />
-    <None Include="Encapsulation.cs" />
     <None Include="ExtensionMethods.cs" />
     <None Include="FindDuplicateString.cs" />
     <None Include="IntegerDuplicate.cs" />
