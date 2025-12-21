@@ -12,3 +12,4 @@ D:\Interview\2025\2025\2025\obj\Debug\net8.0\refint\2025.dll
 D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.pdb
 D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.genruntimeconfig.cache
 D:\Interview\2025\2025\2025\obj\Debug\net8.0\ref\2025.dll
+D:\Interview\2025\2025\2025\obj\Debug\net8.0\2025.sourcelink.json
