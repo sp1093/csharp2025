@@ -2,6 +2,9 @@ trigger:
 - main   # or master branch
 
 pool:
+  name: Default 
+  demands:
+    - Agent.Name -equals agent1
   vmImage: 'windows-latest'
 
 steps:
