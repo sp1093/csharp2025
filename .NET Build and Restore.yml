@@ -11,7 +11,7 @@ steps:
 # Step 1: Cache .NET SDK
 - task: Cache@2
   inputs:
-    key: 'dotnet-sdk | $(Agent.OS) | 8.x'
+    key: 'dotnet-sdk | $(Agent.OS) | 6.x'
     restoreKeys: |
       dotnet-sdk | $(Agent.OS)
     path: $(Agent.ToolsDirectory)/dotnet
@@ -20,7 +20,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '8.x'   # Adjust to your .NET version
+    version: '6.x'   # Adjust to your .NET version
 
 # Step 3: Cache NuGet packages
 - task: Cache@2
