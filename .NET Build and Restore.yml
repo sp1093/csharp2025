@@ -8,21 +8,13 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-# Step 1: Cache .NET SDK
-- task: Cache@2
-  inputs:
-    key: 'dotnet-sdk | $(Agent.OS) | 6.x'
-    restoreKeys: |
-      dotnet-sdk | $(Agent.OS)
-    path: $(Agent.ToolsDirectory)/dotnet
-
-# Step 2: Use .NET SDK
+# Step 1: Use .NET SDK
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '6.x'   # Adjust to your .NET version
+    version: '8.x'   # Adjust to your .NET version
 
-# Step 3: Cache NuGet packages
+# Step 2: Cache NuGet packages
 - task: Cache@2
   inputs:
     key: 'nuget | $(Agent.OS) | $(Build.SourcesDirectory)/**/*.csproj'
@@ -30,14 +22,14 @@ steps:
       nuget | $(Agent.OS)
     path: $(Pipeline.Workspace)/.nuget/packages
 
-# Step 4: Restore NuGet packages
+# Step 3: Restore NuGet packages
 - script: dotnet restore
   displayName: 'Restore NuGet packages'
 
-# Step 5: Build the project
+# Step 4: Build the project
 - script: dotnet build --configuration Release
   displayName: 'Build Console App'
 
-# Step 6: Run unit tests
+# Step 5: Run unit tests
 - script: dotnet test --configuration Release
   displayName: 'Run Unit Tests for FindDuplicateString'
