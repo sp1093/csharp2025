@@ -14,17 +14,17 @@ steps:
     packageType: 'sdk'
     version: '8.x'   # Adjust to your .NET version
 
-# Step 2: Cache NuGet packages
+# Step 2: Restore NuGet packages
+- script: dotnet restore
+  displayName: 'Restore NuGet packages'
+
+# Step 3: Cache NuGet packages
 - task: Cache@2
   inputs:
     key: 'nuget | $(Agent.OS) | $(Build.SourcesDirectory)/**/*.csproj'
     restoreKeys: |
       nuget | $(Agent.OS)
     path: $(Pipeline.Workspace)/.nuget/packages
-
-# Step 3: Restore NuGet packages
-- script: dotnet restore
-  displayName: 'Restore NuGet packages'
 
 # Step 4: Build the project
 - script: dotnet build --configuration Release
