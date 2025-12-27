@@ -36,7 +36,7 @@ namespace _2025
             {
                 Console.WriteLine("No duplicates found.");
             }
-            Console.writeLine(".............................................");
+            Console.WriteLine(".............................................");
 
             Console.ReadLine();
         }
