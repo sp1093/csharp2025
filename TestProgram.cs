@@ -13,6 +13,7 @@ namespace _2025
         {
             Console.WriteLine("TestProgram output");
 
+            Console.WriteLine(".............................................");
 
             Console.ReadLine();
         }
