@@ -15,11 +15,11 @@
     <Compile Remove="DuplicateInteger.cs" />
     <Compile Remove="Encapsulation.cs" />
     <Compile Remove="ExtensionMethods.cs" />
-    <Compile Remove="FindDuplicateString.cs" />
     <Compile Remove="IntegerDuplicate.cs" />
     <Compile Remove="RemoveDuplicateArray.cs" />
     <Compile Remove="StringReverser.cs" />
     <Compile Remove="SubstringFinder.cs" />
+    <Compile Remove="TestProgram.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,11 +29,11 @@
     <None Include="DuplicateInteger.cs" />
     <None Include="Encapsulation.cs" />
     <None Include="ExtensionMethods.cs" />
-    <None Include="FindDuplicateString.cs" />
     <None Include="IntegerDuplicate.cs" />
     <None Include="RemoveDuplicateArray.cs" />
     <None Include="StringReverser.cs" />
     <None Include="SubstringFinder.cs" />
+    <None Include="TestProgram.cs" />
   </ItemGroup>
 
 </Project>

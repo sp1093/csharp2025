@@ -15,11 +15,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Interview\\2025\\2025\\2025\\2025.csproj",
+      "projectUniqueName": "D:\\Interview\\2025Dec\\2025\\2025.csproj",
       "projectName": "2025",
-      "projectPath": "D:\\Interview\\2025\\2025\\2025\\2025.csproj",
+      "projectPath": "D:\\Interview\\2025Dec\\2025\\2025.csproj",
       "packagesPath": "C:\\Users\\sprak\\.nuget\\packages\\",
-      "outputPath": "D:\\Interview\\2025\\2025\\2025\\obj\\",
+      "outputPath": "D:\\Interview\\2025Dec\\2025\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",

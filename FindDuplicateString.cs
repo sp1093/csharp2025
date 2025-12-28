@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+
 namespace _2025
 {
     internal class FindDuplicateString
@@ -34,7 +36,7 @@ namespace _2025
             {
                 Console.WriteLine("No duplicates found.");
             }
-
+            Console.WriteLine(".............................................");
 
             Console.ReadLine();
         }
