@@ -1,6 +1,15 @@
 trigger:
 - main   # or master branch
 
+#Below line will run only for a single program
+# trigger:
+#   branches:
+#     include:
+#       - main  # or master branch
+#   paths:
+#     include:
+#       - path/to/your/program/**  # Add the specific directory or file path you want to track changes for
+
 pool:
   name: Default 
   demands:
