@@ -45,4 +45,4 @@ steps:
           xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y
           cd C:\deploy\myapp
           dotnet MyApp.dll
-        "@
+        
