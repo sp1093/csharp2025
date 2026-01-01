@@ -38,11 +38,7 @@ steps:
         --resource-group testRG `
         --name prem `
         --command-id RunPowerShellScript `
-        --scripts @"
-          if (!(Test-Path 'C:\deploy\myapp')) {
-            New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null
-          }
-          xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y
-          cd C:\deploy\myapp
-          dotnet MyApp.dll
-        
+        --scripts "if (!(Test-Path 'C:\deploy\myapp')) { New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null }" `
+                 "xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y" `
+                 "cd C:\deploy\myapp" `
+                 "dotnet MyApp.dll"
