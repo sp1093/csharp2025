@@ -1,15 +1,6 @@
 trigger:
 - main   # or master branch
 
-#Below line will run only for a single program
-# trigger:
-#   branches:
-#     include:
-#       - main  # or master branch
-#   paths:
-#     include:
-#       - path/to/your/program/**  # Add the specific directory or file path you want to track changes for
-
 pool:
   name: Default 
   demands:
@@ -30,3 +21,28 @@ steps:
 
 - script: dotnet test --configuration Release
   displayName: 'Run Unit Tests for FindDuplicateString'
+
+# -------------------------------
+# Publish and Deploy to Azure VM
+# -------------------------------
+- script: dotnet publish --configuration Release -o $(Build.ArtifactStagingDirectory)/publish
+  displayName: 'Publish App'
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- your existing service connection
+    scriptType: 'ps'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az vm run-command invoke `
+        --resource-group testRG `
+        --name prem `
+        --command-id RunPowerShellScript `
+        --scripts @"
+          if (!(Test-Path 'C:\deploy\myapp')) {
+            New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null
+          }
+          xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y
+          cd C:\deploy\myapp
+          dotnet MyApp.dll
+        "@
