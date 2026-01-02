@@ -2,10 +2,9 @@ trigger:
 - main   # or master branch
 
 pool:
-  name: Default 
+  name: Default
   demands:
-    - Agent.Name -equals agent1
-  vmImage: 'windows-latest'
+    - Agent.Name -equals agent1   # self-hosted agent requirement
 
 steps:
 # Install .NET SDK
@@ -37,16 +36,15 @@ steps:
     ArtifactName: 'drop'
     publishLocation: 'Container'
 
-# Deploy to Azure VM using WinRM or SSH
+# Deploy to Azure VM using Azure CLI
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # must match service connection name
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      az vm run-command invoke \
-        --resource-group testRG \
-        --name prem \
-        --command-id RunPowerShellScript \
+      az vm run-command invoke `
+        --resource-group testRG `
+        --name prem `
+        --command-id RunPowerShellScript `
         --scripts "mkdir C:\\MyApp; Write-Output 'Deployment script executed'"
-
