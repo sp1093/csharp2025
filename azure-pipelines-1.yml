@@ -1,5 +1,5 @@
 trigger:
-- main   # or master branch
+- main   # Trigger on push to the main branch
 
 pool:
   name: Default
@@ -34,20 +34,24 @@ steps:
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      # Ensure the directory exists on the VM
+      # Ensure that the deployment directory exists on the VM
       if (!(Test-Path 'C:\deploy\myapp')) { 
-          New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null 
+          Write-Host "Creating directory C:\deploy\myapp"
+          New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null
       }
 
-      # Copy the published app from the pipeline's artifact staging directory to the VM
+      # Copy the published files to the target directory on the VM
+      Write-Host "Copying published files to C:\deploy\myapp"
       xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y
 
-      # Navigate to the app directory on the VM
+      # Navigate to the app directory
+      Write-Host "Navigating to the app directory"
       cd C:\deploy\myapp
 
-      # Run the application (replace MyApp.dll with your app's DLL name)
-      Write-Host "Running MyApp on the Azure VM"
+      # Run the application (replace MyApp.dll with your app's actual DLL name)
+      Write-Host "Running the application on Azure VM"
       dotnet MyApp.dll
+
       displayName: 'Deploy and Run App on Azure VM'
 
 # Optional: You can add additional steps to verify the deployment if needed.
