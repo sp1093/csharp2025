@@ -1,62 +1,42 @@
 trigger:
-- main   # Trigger on push to the main branch
+- main
 
 pool:
-  name: Default
-  demands:
-    - Agent.Name -equals agent1
   vmImage: 'windows-latest'
 
 steps:
-# Step 1: Use .NET SDK
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '8.x'   # Adjust to your .NET version
+    version: '8.x'
 
-# Step 2: Restore NuGet packages
 - script: dotnet restore
   displayName: 'Restore NuGet packages'
 
-# Step 3: Build the application
 - script: dotnet build --configuration Release
   displayName: 'Build Console App'
 
-# Step 4: Run unit tests
 - script: dotnet test --configuration Release
-  displayName: 'Run Unit Tests for FindDuplicateString'
+  displayName: 'Run Unit Tests'
 
-# -------------------------------
-# Publish and Deploy to Azure VM
-# -------------------------------
-
-# Step 5: Publish the application
 - script: dotnet publish --configuration Release -o $(Build.ArtifactStagingDirectory)/publish
   displayName: 'Publish App'
 
-# Step 6: Deploy and run the application on Azure VM
-- task: AzureCLI@2
+# Copy published files to Azure VM
+- task: AzureFileCopy@4
   inputs:
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- Your Azure service connection name
-    scriptType: 'ps'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      # Ensure the deployment directory exists on the VM
-      if (!(Test-Path 'C:\deploy\myapp')) { 
-          Write-Host "Creating directory C:\deploy\myapp"
-          New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null
-      }
+    SourcePath: '$(Build.ArtifactStagingDirectory)/publish'
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'
+    DestinationType: 'AzureVMs'
+    ResourceGroup: 'yourResourceGroup'
+    VMName: 'yourVMName'
+    TargetPath: 'C:\deploy\myapp'
 
-      # Copy the published files to the target directory on the VM
-      Write-Host "Copying published files to C:\deploy\myapp"
-      xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y
-
-      # Navigate to the app directory on the VM
-      Write-Host "Navigating to the app directory"
+# Run app on VM (via WinRM or script extension)
+- task: PowerShellOnTargetMachines@3
+  inputs:
+    Machines: 'yourVMName'
+    ScriptType: 'InlineScript'
+    InlineScript: |
       cd C:\deploy\myapp
-
-      # Run the application (replace MyApp.dll with your actual app DLL name)
-      Write-Host "Running the application on Azure VM"
-      dotnet MyApp.dll
-
-    displayName: 'Deploy and Run App on Azure VM'
+      dotnet FindDuplicateString.dll
