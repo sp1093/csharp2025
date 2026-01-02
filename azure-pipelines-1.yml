@@ -1,46 +1,47 @@
 trigger:
-- main   # or master branch
+- main   # or your branch name
 
 pool:
-  name: Default 
-  demands:
-    - Agent.Name -equals agent1
   vmImage: 'windows-latest'
 
 steps:
-- task: UseDotNet@2
-  inputs:
-    packageType: 'sdk'
-    version: '8.x'   # Adjust to your .NET version
-
-- script: dotnet restore
+# Step 1: Restore & Build
+- task: DotNetCoreCLI@2
   displayName: 'Restore NuGet packages'
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
 
-- script: dotnet build --configuration Release
-  displayName: 'Build Console App'
+- task: DotNetCoreCLI@2
+  displayName: 'Build solution'
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '--configuration Release'
 
-- script: dotnet test --configuration Release
-  displayName: 'Run Unit Tests for FindDuplicateString'
+# Step 2: Publish
+- task: DotNetCoreCLI@2
+  displayName: 'Publish project'
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+    arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/publish'
+    zipAfterPublish: false
 
-# -------------------------------
-# Publish and Deploy to Azure VM
-# -------------------------------
-# Step 1: Publish
-- script: dotnet publish --configuration Release -o $(Build.ArtifactStagingDirectory)/publish
-  displayName: 'Publish App'
-
-# Step 2: Copy files to VM
+# Step 3: Copy files to VM
 - task: AzureFileCopy@4
+  displayName: 'Copy published files to VM'
   inputs:
     SourcePath: '$(Build.ArtifactStagingDirectory)/publish'
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # your service connection
     Destination: 'AzureVMs'
     ResourceGroup: 'testRG'
     VMName: 'prem'
     DestinationFolder: 'C:\deploy\myapp'
 
-# Step 3: Run app on VM
+# Step 4: Run app on VM
 - task: AzureCLI@2
+  displayName: 'Run app on VM'
   inputs:
     azureSubscription: 'firstsconnection_WindowsVM_Dotnet'
     scriptType: 'ps'
@@ -51,4 +52,3 @@ steps:
         --name prem `
         --command-id RunPowerShellScript `
         --scripts "cd C:\deploy\myapp; dotnet MyApp.dll"
-
