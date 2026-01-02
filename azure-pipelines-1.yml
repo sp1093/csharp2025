@@ -8,33 +8,40 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
+# Step 1: Use .NET SDK
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
     version: '8.x'   # Adjust to your .NET version
 
+# Step 2: Restore NuGet packages
 - script: dotnet restore
   displayName: 'Restore NuGet packages'
 
+# Step 3: Build the application
 - script: dotnet build --configuration Release
   displayName: 'Build Console App'
 
+# Step 4: Run unit tests
 - script: dotnet test --configuration Release
   displayName: 'Run Unit Tests for FindDuplicateString'
 
 # -------------------------------
 # Publish and Deploy to Azure VM
 # -------------------------------
+
+# Step 5: Publish the application
 - script: dotnet publish --configuration Release -o $(Build.ArtifactStagingDirectory)/publish
   displayName: 'Publish App'
 
+# Step 6: Deploy and run the application on Azure VM
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- Your service connection name
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- Your Azure service connection name
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      # Ensure that the deployment directory exists on the VM
+      # Ensure the deployment directory exists on the VM
       if (!(Test-Path 'C:\deploy\myapp')) { 
           Write-Host "Creating directory C:\deploy\myapp"
           New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null
@@ -44,14 +51,12 @@ steps:
       Write-Host "Copying published files to C:\deploy\myapp"
       xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y
 
-      # Navigate to the app directory
+      # Navigate to the app directory on the VM
       Write-Host "Navigating to the app directory"
       cd C:\deploy\myapp
 
-      # Run the application (replace MyApp.dll with your app's actual DLL name)
+      # Run the application (replace MyApp.dll with your actual app DLL name)
       Write-Host "Running the application on Azure VM"
       dotnet MyApp.dll
 
-      displayName: 'Deploy and Run App on Azure VM'
-
-# Optional: You can add additional steps to verify the deployment if needed.
+    displayName: 'Deploy and Run App on Azure VM'
