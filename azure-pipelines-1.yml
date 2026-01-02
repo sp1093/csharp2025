@@ -1,14 +1,17 @@
 trigger:
-- main
+- main   # or master branch
 
 pool:
+  name: Default 
+  demands:
+    - Agent.Name -equals agent1
   vmImage: 'windows-latest'
 
 steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '8.x'
+    version: '8.x'   # Adjust to your .NET version
 
 - script: dotnet restore
   displayName: 'Restore NuGet packages'
@@ -17,26 +20,25 @@ steps:
   displayName: 'Build Console App'
 
 - script: dotnet test --configuration Release
-  displayName: 'Run Unit Tests'
+  displayName: 'Run Unit Tests for FindDuplicateString'
 
+# -------------------------------
+# Publish and Deploy to Azure VM
+# -------------------------------
 - script: dotnet publish --configuration Release -o $(Build.ArtifactStagingDirectory)/publish
   displayName: 'Publish App'
 
-# Copy published files to Azure VM
-- task: AzureFileCopy@4
+- task: AzureCLI@2
   inputs:
-    SourcePath: '$(Build.ArtifactStagingDirectory)/publish'
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'
-    DestinationType: 'AzureVMs'
-    ResourceGroup: 'yourResourceGroup'
-    VMName: 'yourVMName'
-    TargetPath: 'C:\deploy\myapp'
-
-# Run app on VM (via WinRM or script extension)
-- task: PowerShellOnTargetMachines@3
-  inputs:
-    Machines: 'yourVMName'
-    ScriptType: 'InlineScript'
-    InlineScript: |
-      cd C:\deploy\myapp
-      dotnet FindDuplicateString.dll
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- your existing service connection
+    scriptType: 'ps'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az vm run-command invoke `
+        --resource-group testRG `
+        --name prem `
+        --command-id RunPowerShellScript `
+        --scripts "if (!(Test-Path 'C:\deploy\myapp')) { New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null }" `
+                 "xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y" `
+                 "cd C:\deploy\myapp" `
+                 "dotnet MyApp.dll"
