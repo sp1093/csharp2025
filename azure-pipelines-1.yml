@@ -2,12 +2,12 @@ trigger:
 - main   # or master branch
 
 pool:
-  name: Default 
-  demands:
-    - Agent.Name -equals agent1
   vmImage: 'windows-latest'
 
 steps:
+# -------------------------------
+# Build and Test
+# -------------------------------
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
@@ -23,14 +23,29 @@ steps:
   displayName: 'Run Unit Tests for FindDuplicateString'
 
 # -------------------------------
-# Publish and Deploy to Azure VM
+# Publish App
 # -------------------------------
 - script: dotnet publish --configuration Release -o $(Build.ArtifactStagingDirectory)/publish
   displayName: 'Publish App'
 
+# -------------------------------
+# Copy Published Files to VM
+# -------------------------------
+- task: AzureFileCopy@4
+  inputs:
+    SourcePath: '$(Build.ArtifactStagingDirectory)/publish'
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- your service connection
+    Destination: 'AzureVMs'
+    ResourceGroup: 'testRG'
+    DestinationVMName: 'prem'
+    TargetPath: 'C:\deploy\myapp'
+
+# -------------------------------
+# Run App on VM
+# -------------------------------
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- your existing service connection
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
@@ -38,7 +53,4 @@ steps:
         --resource-group testRG `
         --name prem `
         --command-id RunPowerShellScript `
-        --scripts "if (!(Test-Path 'C:\deploy\myapp')) { New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null }" `
-                 "xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y" `
-                 "cd C:\deploy\myapp" `
-                 "dotnet MyApp.dll"
+        --scripts "cd C:\deploy\myapp; dotnet MyApp.dll"
