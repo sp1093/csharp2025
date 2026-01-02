@@ -1,54 +1,53 @@
 trigger:
-- main   # or your branch name
+- main   # or master branch
 
 pool:
+  name: Default
+  demands:
+    - Agent.Name -equals agent1
   vmImage: 'windows-latest'
 
 steps:
-# Step 1: Restore & Build
-- task: DotNetCoreCLI@2
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'   # Adjust to your .NET version
+
+- script: dotnet restore
   displayName: 'Restore NuGet packages'
-  inputs:
-    command: 'restore'
-    projects: '**/*.csproj'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Build solution'
-  inputs:
-    command: 'build'
-    projects: '**/*.csproj'
-    arguments: '--configuration Release'
+- script: dotnet build --configuration Release
+  displayName: 'Build Console App'
 
-# Step 2: Publish
-- task: DotNetCoreCLI@2
-  displayName: 'Publish project'
-  inputs:
-    command: 'publish'
-    publishWebProjects: true
-    arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/publish'
-    zipAfterPublish: false
+- script: dotnet test --configuration Release
+  displayName: 'Run Unit Tests for FindDuplicateString'
 
-# Step 3: Copy files to VM
-- task: AzureFileCopy@4
-  displayName: 'Copy published files to VM'
-  inputs:
-    SourcePath: '$(Build.ArtifactStagingDirectory)/publish'
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # your service connection
-    Destination: 'AzureVMs'
-    ResourceGroup: 'testRG'
-    VMName: 'prem'
-    DestinationFolder: 'C:\deploy\myapp'
+# -------------------------------
+# Publish and Deploy to Azure VM
+# -------------------------------
+- script: dotnet publish --configuration Release -o $(Build.ArtifactStagingDirectory)/publish
+  displayName: 'Publish App'
 
-# Step 4: Run app on VM
 - task: AzureCLI@2
-  displayName: 'Run app on VM'
   inputs:
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- Your service connection name
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      az vm run-command invoke `
-        --resource-group testRG `
-        --name prem `
-        --command-id RunPowerShellScript `
-        --scripts "cd C:\deploy\myapp; dotnet MyApp.dll"
+      # Ensure the directory exists on the VM
+      if (!(Test-Path 'C:\deploy\myapp')) { 
+          New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null 
+      }
+
+      # Copy the published app from the pipeline's artifact staging directory to the VM
+      xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y
+
+      # Navigate to the app directory on the VM
+      cd C:\deploy\myapp
+
+      # Run the application (replace MyApp.dll with your app's DLL name)
+      Write-Host "Running MyApp on the Azure VM"
+      dotnet MyApp.dll
+      displayName: 'Deploy and Run App on Azure VM'
+
+# Optional: You can add additional steps to verify the deployment if needed.
