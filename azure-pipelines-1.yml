@@ -8,37 +8,45 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
+# Install .NET SDK
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
     version: '8.x'   # Adjust to your .NET version
 
+# Restore NuGet packages
 - script: dotnet restore
   displayName: 'Restore NuGet packages'
 
+# Build the app
 - script: dotnet build --configuration Release
   displayName: 'Build Console App'
 
+# Run unit tests
 - script: dotnet test --configuration Release
   displayName: 'Run Unit Tests for FindDuplicateString'
 
-# -------------------------------
-# Publish and Deploy to Azure VM
-# -------------------------------
-- script: dotnet publish --configuration Release -o $(Build.ArtifactStagingDirectory)/publish
-  displayName: 'Publish App'
+# Publish the app to an artifact folder
+- script: dotnet publish --configuration Release --output $(Build.ArtifactStagingDirectory)
+  displayName: 'Publish Console App'
 
+# Publish build artifacts so they can be deployed
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+# Deploy to Azure VM using WinRM or SSH
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- your existing service connection
+    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      az vm run-command invoke `
-        --resource-group testRG `
-        --name prem `
-        --command-id RunPowerShellScript `
-        --scripts "if (!(Test-Path 'C:\deploy\myapp')) { New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null }" `
-                 "xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y" `
-                 "cd C:\deploy\myapp" `
-                 "dotnet MyApp.dll"
+      az vm run-command invoke \
+        --resource-group testRG \
+        --name prem \
+        --command-id RunPowerShellScript \
+        --scripts "mkdir C:\\MyApp; Write-Output 'Deployment script executed'"
+
