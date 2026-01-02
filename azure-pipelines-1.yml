@@ -1,44 +1,67 @@
 trigger:
-- main   # or master branch
+- main
 
 pool:
   name: Default 
   demands:
     - Agent.Name -equals agent1
-  vmImage: 'windows-latest'
+  # vmImage: 'windows-latest' # Not needed for self-hosted agent
+
+variables:
+  buildConfiguration: 'Release'
+  # Azure resource identifiers
+  azureSubscription: 'firstsconnection_WindowsVM_Dotnet'
+  resourceGroupName: 'testRG'
+  vmName: 'prem'
+  # Deployment paths
+  targetPathOnVM: 'C:\deploy\myapp'
 
 steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '8.x'   # Adjust to your .NET version
+    version: '8.x'
+  displayName: 'Install .NET SDK'
 
 - script: dotnet restore
   displayName: 'Restore NuGet packages'
 
-- script: dotnet build --configuration Release
+- script: dotnet build --configuration $(buildConfiguration)
   displayName: 'Build Console App'
 
-- script: dotnet test --configuration Release
+- script: dotnet test --configuration $(buildConfiguration)
   displayName: 'Run Unit Tests for FindDuplicateString'
 
-# -------------------------------
-# Publish and Deploy to Azure VM
-# -------------------------------
-- script: dotnet publish --configuration Release -o $(Build.ArtifactStagingDirectory)/publish
+# Publish the application to a local directory on the agent
+- script: dotnet publish --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/publish
   displayName: 'Publish App'
 
-- task: AzureCLI@2
+# Step 1: Copy published files to the Azure VM using the modern AzureFileCopy@4 task
+- task: AzureFileCopy@4
+  displayName: 'Copy files to Azure VM'
   inputs:
-    azureSubscription: 'firstsconnection_WindowsVM_Dotnet'   # <-- your existing service connection
+    SourcePath: '$(Build.ArtifactStagingDirectory)/publish'
+    azureSubscription: '$(azureSubscription)'
+    Destination: 'AzureVMs'
+    ResourceGroupName: '$(resourceGroupName)'
+    vmNames: '$(vmName)'
+    TargetPath: '$(targetPathOnVM)'
+    StorageAccount: # (Optional) Specify if you want to use an intermediate storage account
+    CleanTargetBeforeCopy: false # Set to true to clean the target directory before copying
+    CopyFilesInParallel: true
+    AdditionalArgumentsForBlobCopy: # (Optional) Additional arguments for azcopy
+    EnablePrerequisites: 'false' # Set to 'true' if the task needs to install prerequisites on the VM (not needed for file copy)
+
+# Step 2: Run the application on the Azure VM
+- task: AzureCLI@2
+  displayName: 'Run App on VM'
+  inputs:
+    azureSubscription: '$(azureSubscription)'
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
       az vm run-command invoke `
-        --resource-group testRG `
-        --name prem `
+        --resource-group $(resourceGroupName) `
+        --name $(vmName) `
         --command-id RunPowerShellScript `
-        --scripts "if (!(Test-Path 'C:\deploy\myapp')) { New-Item -ItemType Directory -Path 'C:\deploy\myapp' | Out-Null }" `
-                 "xcopy '$(Build.ArtifactStagingDirectory)\publish\*' 'C:\deploy\myapp' /E /Y" `
-                 "cd C:\deploy\myapp" `
-                 "dotnet MyApp.dll"
+        --scripts "cd '$(targetPathOnVM)'; Start-Process -FilePath 'dotnet' -ArgumentList 'MyApp.dll' -NoNewWindow -Wait"
